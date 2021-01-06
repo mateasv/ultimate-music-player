@@ -13,10 +13,14 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.util.ArrayList;
 
-// Test commit
-
 public class Main extends Application {
 
+    /**
+     * Method used by JavaFX to initialize the GUI
+     *
+     * @param primaryStage unknown, handled by JavaFX
+     * @throws Exception Exception in case of a runtime error
+     */
     @Override
     public void start(Stage primaryStage) throws Exception{
         Parent root = FXMLLoader.load(getClass().getResource("player.fxml"));
@@ -26,52 +30,74 @@ public class Main extends Application {
     }
 
 
-    static File dir = new File(System.getProperty("user.dir"));
 
-    public static ArrayList<Song> songArrayList = new ArrayList<Song>();
-    public static ArrayList<Playlist> listOfPlaylists = new ArrayList<Playlist>();
+    // ArrayList of the current playlists
+    public static ArrayList<Playlist> listOfPlaylists = new ArrayList<>();
+
 
     public static void main(String[] args) {
 
-        createFolder(hasSongsFolder(dir), dir);
+        // Make sure the "songs" folder exists
+        if (!folderExists("songs")) {
+            createFolder("songs");
+        }
 
+        // Initialize JavaFX GUI
         launch(args);
 
-        listOfPlaylists.add(new Playlist("whatevs", songArrayList));
+        // Add a new playlist
+        listOfPlaylists.add(new Playlist("whatevs", new ArrayList<>()));
+
+        // Add a song to the first playlist
+        listOfPlaylists.get(0).addToPlaylist(new Song("baby", "kris", "songs"));
 
     }
 
-    public static ArrayList removePlaylist() {
-        listOfPlaylists.remove(1);
-        return listOfPlaylists;
-
+    /**
+     * This method will removed a playlist of the arraylist of playlists.
+     *
+     * @param index Index of the playlist to be removed
+     */
+    public static void removePlaylist(int index) {
+        listOfPlaylists.remove(index);
     }
 
-    public static boolean hasSongsFolder(File directory) {
-        String[] contents = directory.list();
+    /**
+     * Method to check if the "songs" folder exists.
+     *
+     * @param folderName The name of the folder to check for
+     * @return boolean, true if the folder exists
+     */
+    public static boolean folderExists(String folderName) {
+        // new File instance for the current directory
+        File dir = new File(System.getProperty("user.dir"));
+
+        String[] contents = dir.list();
         assert contents != null;
         for(String content: contents){
-            if(content.equals("songs")){
+            if(content.equals(folderName)){
+                // The folder exists!
                 return true;
             }
         }
         return false;
     }
 
-    public static void createFolder(boolean exists, File directory){
-        String path = "\\songs";
+    /**
+     * Creates a folder with the specified name
+     *
+     * @param folderName The name of the folder to create
+     * @return boolean, true if the folder was created successfully
+     */
+    public static boolean createFolder(String folderName){
+        // new File instance for the current directory
+        File dir = new File(System.getProperty("user.dir"));
+
+        String path = "\\" + folderName;
         boolean created;
-        if(exists){
-            System.out.println("Folder already exists");
-            return;
-        }
-            directory = new File(directory + path);
-            created = directory.mkdir();
-            if(created){
-                System.out.println("The folder has been created");
-            }
-            else{
-                System.out.println("The folder could not be created");
-            }
+        dir = new File(dir + path);
+        created = dir.mkdir();
+
+        return created; // True = created successfully
     }
 }
