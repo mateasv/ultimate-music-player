@@ -5,18 +5,19 @@ import java.io.*;
 
 public class Song {
 
-    private String title, artist, genre, path;
+    private String title, artist, path;
     private File song;
 
 
-    private Song(String songTitle, String artistName, String songGenre, String filePath){
+    public Song(String songTitle, String artistName, String filePath){
             this.title = songTitle;
             this.artist = artistName;
-            this.genre = songGenre;
             this.path = filePath;
     }
 
-    //Find song metadata
+    /**
+     * Find song metadata
+     */
     public void getSongData(){
         song = new File(System.getProperty("user.dir"));
 
@@ -28,10 +29,6 @@ public class Song {
 
     public String getArtist() {
         return artist;
-    }
-
-    public String getGenre() {
-        return genre;
     }
 
     public String getPath() {
