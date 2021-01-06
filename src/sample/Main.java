@@ -1,15 +1,10 @@
 package sample;
 
 import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.ListView;
 import javafx.stage.Stage;
-
 import java.io.File;
 import java.util.ArrayList;
 
@@ -25,11 +20,15 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         Parent root = FXMLLoader.load(getClass().getResource("player.fxml"));
         primaryStage.setTitle("Ultimate Music Player");
-        primaryStage.setScene(new Scene(root, 450, 350));
+        primaryStage.setScene(new Scene(root, 750, 450));
         primaryStage.show();
     }
 
+    // new File instance for the current directory
+    private static File currentDir = new File(System.getProperty("user.dir"));
 
+    // Current song list
+    public static ArrayList<String> songsList = getSongsInFolder("songs");
 
     // ArrayList of the current playlists
     public static ArrayList<Playlist> listOfPlaylists = new ArrayList<>();
@@ -39,11 +38,10 @@ public class Main extends Application {
 
         // Make sure the "songs" folder exists
         if (!folderExists("songs")) {
-            createFolder("songs");
+            if (!createFolder("songs")) {
+                System.out.println("There was an error creating the \"songs\" folder.");
+            }
         }
-
-        // Initialize JavaFX GUI
-        launch(args);
 
         // Add a new playlist
         listOfPlaylists.add(new Playlist("whatevs", new ArrayList<>()));
@@ -51,6 +49,10 @@ public class Main extends Application {
         // Add a song to the first playlist
         listOfPlaylists.get(0).addToPlaylist(new Song("baby", "kris", "songs"));
 
+        getSongsInFolder("songs");
+
+        // Initialize JavaFX GUI
+        launch(args);
     }
 
     /**
@@ -63,16 +65,43 @@ public class Main extends Application {
     }
 
     /**
+     * This method will return a String array of discovered songs in the "songs" folder.
+     *
+     * @param folderName The folder to look in
+     * @return String array of discovered songs
+     */
+    public static ArrayList<String> getSongsInFolder(String folderName) {
+        // Local String ArrayList which will be returned once this function is finished successfully.
+        ArrayList<String> tempSongList = new ArrayList<>();
+
+        // Declares and initializes a String array of files in the given folder (May be null)
+        String[] currentFolderFile = new File(currentDir + "\\" + folderName).list();
+
+        // Checks if currentFolderFile to avoid a potential NullPointerException
+        if (currentFolderFile == null) {
+            System.out.println("Info: No songs were found in the \"songs\" folder.");
+            return new ArrayList<>();
+        }
+
+        // Add all .mp3 and .wav files to the tempSongList, which will be returned
+        for (String song : currentFolderFile) {
+            if (song.endsWith(".mp3") || song.endsWith(".wav")) {
+                //System.out.println("New song discovered: " + song);
+                tempSongList.add(song);
+            }
+        }
+
+        return tempSongList;
+    }
+
+    /**
      * Method to check if the "songs" folder exists.
      *
      * @param folderName The name of the folder to check for
      * @return boolean, true if the folder exists
      */
     public static boolean folderExists(String folderName) {
-        // new File instance for the current directory
-        File dir = new File(System.getProperty("user.dir"));
-
-        String[] contents = dir.list();
+        String[] contents = currentDir.list();
         assert contents != null;
         for(String content: contents){
             if(content.equals(folderName)){
@@ -90,13 +119,10 @@ public class Main extends Application {
      * @return boolean, true if the folder was created successfully
      */
     public static boolean createFolder(String folderName){
-        // new File instance for the current directory
-        File dir = new File(System.getProperty("user.dir"));
-
         String path = "\\" + folderName;
         boolean created;
-        dir = new File(dir + path);
-        created = dir.mkdir();
+        currentDir = new File(currentDir + path);
+        created = currentDir.mkdir();
 
         return created; // True = created successfully
     }

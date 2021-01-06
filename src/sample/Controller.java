@@ -8,18 +8,17 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-
 import java.net.URL;
 import java.util.ResourceBundle;
+import static sample.Main.getSongsInFolder;
 
 public class Controller implements Initializable {
 
 
-    ObservableList<String> items = FXCollections.observableArrayList (
-            "Test Song 1", "Test Song 2", "Test Song 3", "Test Song 4");
+    ObservableList<String> items = FXCollections.observableArrayList (sample.Main.songsList);
 
     @FXML
-    ListView<String> songsList = new ListView<String>(items);
+    ListView<String> songsList = new ListView<>(items);
 
     @FXML
     TextField textFieldSearch = new TextField();
@@ -27,6 +26,8 @@ public class Controller implements Initializable {
     @FXML
     Button playBtn = new Button();
 
+
+    //
 
 
     @FXML
