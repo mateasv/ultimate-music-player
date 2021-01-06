@@ -1,24 +1,42 @@
 package sample;
 
 
+import java.io.*;
+
 public class Song {
-    String songTitle, artistName, songGenre, filePath;
+
+    private String title, artist, genre, path;
+    private File song;
 
 
-
-    Song(String songTitle, String artistName, String songGenre, String filePath){
-        this.songTitle = songTitle;
-        this.artistName = artistName;
-        this.songGenre = songGenre;
-        this.filePath = filePath;
-
+    private Song(String songTitle, String artistName, String songGenre, String filePath){
+            this.title = songTitle;
+            this.artist = artistName;
+            this.genre = songGenre;
+            this.path = filePath;
     }
-
-
 
     //Find song metadata
     public void getSongData(){
-
+        song = new File(System.getProperty("user.dir"));
 
     }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getArtist() {
+        return artist;
+    }
+
+    public String getGenre() {
+        return genre;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+
 }
