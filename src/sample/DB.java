@@ -173,8 +173,7 @@ public class DB {
                 int rows = ps.executeUpdate();
                 ps.close();
                 if (rows > 0) {
-                    boolean var2 = true;
-                    return var2;
+                    return true;
                 }
             } catch (SQLException | RuntimeException var6) {
                 System.err.println(var6.getMessage());
@@ -188,7 +187,7 @@ public class DB {
 
     static {
         Properties props = new Properties();
-        String fileName = "db.properties";
+        String fileName = "./src/sample/db.properties";
 
         try {
             InputStream input = new FileInputStream(fileName);
