@@ -38,7 +38,7 @@
                   <Insets left="10.0" />
                </padding>
             </Label>
-            <ListView fx:id="songsList" editable="true" prefHeight="200.0" GridPane.rowIndex="1" />
+            <ListView fx:id="songsList" editable="true" onMouseClicked="#songsListClick" prefHeight="200.0" GridPane.rowIndex="1" />
          </children>
       </GridPane>
 	  <GridPane prefWidth="200.0" GridPane.rowIndex="1">
@@ -75,9 +75,9 @@
             <ListView fx:id="queueList" prefHeight="200.0" GridPane.rowIndex="1" />
          </children>
       </GridPane>
-      <Pane maxHeight="20.0" prefHeight="20.0" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER">
+      <Pane maxHeight="20.0" prefHeight="20.0" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER">
          <children>
-            <Label text="Currently Playing:">
+            <Label fx:id="lblCurrentlyPlaying" text="Currently Playing:">
                <font>
                   <Font size="14.0" />
                </font>
@@ -98,7 +98,7 @@
         </rowConstraints>
          <children>
             <Button fx:id="prevBtn" mnemonicParsing="false" text="&lt; PREV" GridPane.halignment="CENTER" />
-            <Button fx:id="playBtn" mnemonicParsing="false" onMouseClicked="#playBtnClicked" prefHeight="25.0" prefWidth="53.0" text="PLAY" GridPane.columnIndex="1" GridPane.halignment="CENTER" />
+            <Button fx:id="playBtn" mnemonicParsing="false" onMouseClicked="#playBtnClicked" prefHeight="25.0" prefWidth="53.0" text="⏵" GridPane.columnIndex="1" GridPane.halignment="CENTER" />
             <Button fx:id="nextBtn" mnemonicParsing="false" text="NEXT &gt;" GridPane.columnIndex="2" GridPane.halignment="CENTER" />
          </children>
       </GridPane>
