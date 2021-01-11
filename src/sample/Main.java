@@ -33,8 +33,9 @@ public class Main extends Application {
     // ArrayList of the current playlists
     public static ArrayList<Playlist> listOfPlaylists = new ArrayList<>();
 
-
     public static void main(String[] args) {
+
+
 
         // Make sure the "songs" folder exists
         if (!folderExists("songs")) {
@@ -43,13 +44,30 @@ public class Main extends Application {
             }
         }
 
-        // Add a new playlist
-        listOfPlaylists.add(new Playlist("whatevs", new ArrayList<>()));
+        //getSongsInFolder("songs");
 
-        // Add a song to the first playlist
-        listOfPlaylists.get(0).addToPlaylist(new Song("baby", "kris", "songs"));
+        // TEMPORARY
+        DB.selectSQL("SELECT * FROM tblSongs");
 
-        getSongsInFolder("songs");
+        int count = 0;
+        final int COLUMN_COUNT = 4;
+        do{
+            String data = DB.getDisplayData();
+
+            // Checks if there is any more data
+            if (data.equals(DB.NOMOREDATA)){
+                if (count == 0) {
+                    System.out.println("\nNo results matching your search term...");
+                }
+                break;
+            }else{
+                // Makes a new line if we have a new row
+                if ((++count-1) % COLUMN_COUNT == 0) {
+                    System.out.print("\n| ");
+                }
+                System.out.print(data.replaceFirst("\\s++$", "") + " | ");
+            }
+        } while(true);
 
         // Initialize JavaFX GUI
         launch(args);
@@ -93,6 +111,8 @@ public class Main extends Application {
 
         return tempSongList;
     }
+
+
 
     /**
      * Method to check if the "songs" folder exists.
