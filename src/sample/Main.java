@@ -74,6 +74,61 @@ public class Main extends Application {
     }
 
     /**
+     * This function is meant to be run only when the program is started.
+     * It will query the database for the name of all
+     */
+    public static ArrayList<String> getPlaylistsFromDatabase() {
+        ArrayList<String> tempPlaylists = new ArrayList<>();
+
+        DB.selectSQL("SELECT fldPlaylistName FROM tblPlaylists");
+
+        int count = 0;
+        final int COLUMN_COUNT = 1;
+        do{
+            String data = DB.getDisplayData();
+
+            // Checks if there is any more data
+            if (data.equals(DB.NOMOREDATA)) {
+                if (count == 0) {
+                    System.out.println("\nThere are no playlists stored in the database");
+                }
+                break;
+            } else {
+                count++;
+                tempPlaylists.add(data.replaceFirst("\\s++$", ""));
+            }
+        } while(true);
+
+        return tempPlaylists;
+    }
+
+    public static ArrayList<String> getSongsFromPlaylist(String playlistName) {
+        ArrayList<String> tempPlaylists = new ArrayList<>();
+
+        DB.selectSQL("SELECT fldFilePath FROM tblSongs WHERE fldSongId IN (SELECT fldSongId FROM tblSongsPlaylist WHERE fldPlaylistId = (SELECT fldPlaylistId FROM tblPlaylists WHERE fldPlaylistName = '" + playlistName + "'));");
+
+        int count = 0;
+        final int COLUMN_COUNT = 1;
+        do{
+            String data = DB.getDisplayData();
+
+            // Checks if there is any more data
+            if (data.equals(DB.NOMOREDATA)) {
+                if (count == 0) {
+                    System.out.println("\nNo songs in this playlist...");
+                    return null;
+                }
+                break;
+            } else {
+                count++;
+                tempPlaylists.add(data.replaceFirst("\\s++$", ""));
+            }
+        } while(true);
+
+        return tempPlaylists;
+    }
+
+    /**
      * This method will removed a playlist of the arraylist of playlists.
      *
      * @param index Index of the playlist to be removed

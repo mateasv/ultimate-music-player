@@ -17,12 +17,16 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
+import static sample.Main.getPlaylistsFromDatabase;
+import static sample.Main.getSongsFromPlaylist;
+
 public class Controller implements Initializable {
 
     // Variables used throughout multiple methods
     private String currentlyPlaying = "";
     private MediaPlayer player = null;
     private String currentSelectedSong = null;
+    private String currentSelectedPlaylist = "";
     private int queuePosition = 0;
 
     ObservableList<String> items = FXCollections.observableArrayList (sample.Main.songsList);
@@ -146,6 +150,27 @@ public class Controller implements Initializable {
         playSong(currentSelectedSong);
     }
 
+    @FXML
+    public void playlistListClicked(Event e) {
+        String tmpCrnt = playlistList.getSelectionModel().getSelectedItem();
+
+        // Makes sure that you have double clicked
+        if (!currentSelectedPlaylist.equals(tmpCrnt)) {
+            currentSelectedPlaylist = playlistList.getSelectionModel().getSelectedItem();
+            return;
+        }
+
+        // Reset so you have to doubleclick
+        currentSelectedPlaylist = "";
+
+        // Import songs from the database
+        ArrayList<String> tmpSongList = getSongsFromPlaylist(tmpCrnt);
+        if (tmpSongList == null) {
+            return;
+        }
+        queueList.getItems().addAll(tmpSongList);
+    }
+
     /**
      * Will load the given songPath (parameter), initialize a new
      * MediaPlayer, and start the new song. We also check the status
@@ -219,7 +244,7 @@ public class Controller implements Initializable {
         playlistList.getItems().add(textFieldPlaylistName.getText());
 
         // Add a new playlist
-        sample.Main.listOfPlaylists.add(new Playlist(textFieldPlaylistName.getText(), new ArrayList<>()));
+        // ADD PLAYLIST DIRECTLY TO DATABASE HERE. sample.Main.listOfPlaylists.add(textFieldPlaylistName.getText());
 
         // 1. Add the playlist to the database!
         // TODO: INSERT INTO tblPlaylists (fldPlaylistName) VALUES ('PLAYLIST_NAME_HERE');
@@ -324,7 +349,7 @@ public class Controller implements Initializable {
     // Make sure to update the database so we always are in sync!
     public void addSongToPlaylist(String playlistName) {
         // Add a song to the first playlist
-        sample.Main.listOfPlaylists.get(0).addToPlaylist(new Song("baby", "kris", "songs"));
+        //sample.Main.listOfPlaylists.get(0).addToPlaylist(new Song("baby", "kris", "songs"));
     }
 
     /**
@@ -363,7 +388,8 @@ public class Controller implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         // Adds all songs to the songsList when the UI initializes
         songsList.setItems(items);
-        // TODO: Get all playlists from the database and add them to the UI
-        //       and ArrayList<Playlist> sample.Main.listOfPlaylists
+
+        // Adds all playlists to the UI
+        playlistList.setItems(FXCollections.observableArrayList(getPlaylistsFromDatabase()));
     }
 }

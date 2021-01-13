@@ -55,7 +55,7 @@
                   <Insets left="10.0" />
                </padding>
             </Label>
-            <ListView fx:id="playlistList" editable="true" prefHeight="250.0" GridPane.rowIndex="1" />
+            <ListView fx:id="playlistList" editable="true" onMouseClicked="#playlistListClicked" prefHeight="250.0" GridPane.rowIndex="1" />
          </children>
       </GridPane>
       <GridPane prefWidth="200.0" GridPane.rowIndex="2">
