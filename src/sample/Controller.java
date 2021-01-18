@@ -15,6 +15,8 @@ import javafx.scene.media.MediaPlayer;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 import static sample.Main.getPlaylistsFromDatabase;
@@ -41,6 +43,9 @@ public class Controller implements Initializable {
     ListView<String> queueList = new ListView<>();
 
     @FXML
+    ListView<String> searchResultsList = new ListView<>();
+
+    @FXML
     TextField textFieldSearch = new TextField();
 
     @FXML
@@ -53,10 +58,52 @@ public class Controller implements Initializable {
     Button prevBtn = new Button();
 
     @FXML
+    Button searchBtn = new Button();
+
+    @FXML
     Label lblCurrentlyPlaying = new Label();
 
     @FXML
     TextField textFieldPlaylistName = new TextField();
+
+    /**
+     * Will take the text from textFieldSearch and search and find
+     * all matching songs and/or artists.
+     */
+    public void searchBtnClicked() {
+        String srch = textFieldSearch.getText().toLowerCase();
+        searchResultsList.getItems().clear();
+        for (String songName : songsList.getItems()) {
+            if (songName.toLowerCase().contains(srch)) {
+                searchResultsList.getItems().add(songName);
+            }
+        }
+    }
+
+    /**
+     * Handles all clicks in the searchResultsList Listview
+     * It will play the song that have been clicked
+     */
+    public void searchResultsListClicked() {
+        currentSelectedSong = searchResultsList.getSelectionModel().getSelectedItem();
+
+        // Clicking the list without clicking on an item is just ignored
+        if (currentSelectedSong == null) {
+            return;
+        }
+
+        // Makes sure that you have double clicked
+        if (!currentSelectedSong.equals(currentlyPlaying)) {
+            currentlyPlaying = currentSelectedSong;
+            return;
+        }
+
+        // Adds the song to the queue and plays it.
+        addSongToQueue(currentSelectedSong);
+
+        // Play the song.
+        playSong(currentSelectedSong);
+    }
 
     /**
      * Handles all "On Mouse Clicked" events
@@ -137,6 +184,11 @@ public class Controller implements Initializable {
     public void songsListClick(Event e) {
         currentSelectedSong = songsList.getSelectionModel().getSelectedItem();
 
+        // Clicking the playlistList without clicking on an item is just ignored
+        if (currentSelectedSong == null) {
+            return;
+        }
+
         // Makes sure that you have double clicked
         if (!currentSelectedSong.equals(currentlyPlaying)) {
             currentlyPlaying = currentSelectedSong;
@@ -153,6 +205,11 @@ public class Controller implements Initializable {
     @FXML
     public void playlistListClicked(Event e) {
         String tmpCrnt = playlistList.getSelectionModel().getSelectedItem();
+
+        // Clicking the playlistList without clicking on an item is just ignored
+        if (tmpCrnt == null) {
+            return;
+        }
 
         // Makes sure that you have double clicked
         if (!currentSelectedPlaylist.equals(tmpCrnt)) {
@@ -222,8 +279,10 @@ public class Controller implements Initializable {
      * @param e Event data
      */
     public void createPlaylistBtnClicked(Event e) {
+        String writtenPlaylistName = textFieldPlaylistName.getText();
+
         // Check if the user wrote anything
-        if (textFieldPlaylistName.getText().length() == 0) {
+        if (writtenPlaylistName.length() == 0) {
             return;
         }
 
@@ -234,21 +293,17 @@ public class Controller implements Initializable {
         // Check if a playlist with the given name already exists
         // (The UI is already synced with the database, no need to check the db)
         for (String playlistName : playlistList.getItems()) {
-            if (textFieldPlaylistName.getText().equals(playlistName)) {
+            if (writtenPlaylistName.equals(playlistName)) {
                 return;
             }
         }
 
         // If we are here in the code, we know that a playlist with
         // the given name does not already exist
-        playlistList.getItems().add(textFieldPlaylistName.getText());
+        playlistList.getItems().add(writtenPlaylistName);
 
-        // Add a new playlist
-        // ADD PLAYLIST DIRECTLY TO DATABASE HERE. sample.Main.listOfPlaylists.add(textFieldPlaylistName.getText());
-
-        // 1. Add the playlist to the database!
-        // TODO: INSERT INTO tblPlaylists (fldPlaylistName) VALUES ('PLAYLIST_NAME_HERE');
-        // INSERT INTO table_name (column1, column2, column3, ...) VALUES (value1, value2, value3, ...);
+        // Add the playlist to the database
+        DB.insertSQL("INSERT INTO tblPlaylists (fldPlaylistName) VALUES ('" + writtenPlaylistName + "')");
     }
 
     /**
@@ -258,16 +313,23 @@ public class Controller implements Initializable {
     public void addSongToPlaylistClicked(Event e) {
         String selItem = playlistList.getSelectionModel().getSelectedItem();
 
-        // Temporary for testing
+        // Check if any playlist is selected.
         if (selItem == null) {
             System.out.println("No playlist selected");
-        } else {
-            System.out.println("Playlist " + selItem + " selected!");
+            return;
         }
 
-        // TODO: Add the song to the playlist:
-        // sample.Main.listOfPlaylists.get(0).addToPlaylist(new Song("baby", "kris", "songs"));
-        // TODO: Also update the database
+        // This is true if the user haven't played a song yet.
+        if (currentlyPlaying.length() == 0) {
+            return;
+        }
+
+        // Should work, haven't tried since songs aren't added to the database yet!
+        // TODO: Make this work with special characters, such as '
+        currentlyPlaying = currentlyPlaying.replace("\'", "\\\'");
+        DB.insertSQL("INSERT INTO tblSongsPlaylist (fldSongId, fldPlaylistId) VALUES ((SELECT fldSongId FROM tblSongs WHERE fldFilePath = '" + currentlyPlaying + "'), (SELECT fldPlaylistId FROM tblPlaylists WHERE fldPlaylistName = '" + selItem + "'))");
+        System.out.println("INSERT INTO tblSongsPlaylist (fldSongId, fldPlaylistId) VALUES ((SELECT fldSongId FROM tblSongs WHERE fldFilePath = '" + currentlyPlaying + "'), (SELECT fldPlaylistId FROM tblPlaylists WHERE fldPlaylistName = '" + selItem + "'))");
+
     }
 
     /**
@@ -333,16 +395,17 @@ public class Controller implements Initializable {
             return;
         }
 
-        System.out.println(selItem);
+        // Remove the playlist from the UI
+        playlistList.getItems().remove(playlistList.getSelectionModel().getSelectedIndex());
 
-        // selItem = Playlist name
-        //
-        // 1. Delete playlist from the UI
-        // 2. Delete all songs related to the deleted playlist
-        // TODO: DELETE * FROM tblSongsPlaylist WHERE fldPlaylistId = (SELECT fldPlaylistId FROM tblPlaylists WHERE fldPlaylistName = 'PLAYLIST_NAME_HERE');
-        // 3. Delete the playlist from the database
-        // TODO: DELETE * FROM tblPlaylists WHERE fldPlaylistName = 'PLAYLIST_NAME_HERE';
+        // Delete all songs in the playlist. No point in storing which songs were stored in a playlist that no longer exists
+        DB.deleteSQL("DELETE FROM tblSongsPlaylist WHERE fldPlaylistId = (SELECT fldPlaylistId FROM tblPlaylists WHERE fldPlaylistName = '" + selItem + "')");
+
+        // Delete the playlist from the database.
+        DB.deleteSQL("DELETE FROM tblPlaylists WHERE fldPlaylistName = '" + selItem + "'");
     }
+
+
 
     // Currently not in use, will add a song to a given playlist
     // All created playlists can be found at ArrayList<Playlist> sample.Main.listOfPlaylists

@@ -128,7 +128,7 @@
                   <Insets left="10.0" />
                </padding>
             </Label>
-            <ListView editable="true" prefHeight="200.0" prefWidth="0.0" GridPane.rowIndex="1" />
+            <ListView fx:id="searchResultsList" editable="true" onMouseClicked="#searchResultsListClicked" prefHeight="200.0" prefWidth="0.0" GridPane.rowIndex="1" />
          </children>
       </GridPane>
       <GridPane hgap="10.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
@@ -147,7 +147,7 @@
                   <Insets bottom="10.0" />
                </GridPane.margin>
             </TextField>
-            <Button fx:id="searchBtn" mnemonicParsing="false" prefWidth="9999.0" text="Search" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.valignment="BOTTOM">
+            <Button fx:id="searchBtn" mnemonicParsing="false" onMouseClicked="#searchBtnClicked" prefWidth="9999.0" text="Search" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.valignment="BOTTOM">
                <GridPane.margin>
                   <Insets bottom="10.0" />
                </GridPane.margin>
