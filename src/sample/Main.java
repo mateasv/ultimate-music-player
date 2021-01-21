@@ -216,7 +216,7 @@ public class Main extends Application {
             System.out.println(tempInsertStatement.toString());
 
             // ERROR: "Could not find stored procedure" ??
-            DB.insertSQL(songsNotAddedToDatabase.toString());
+            DB.insertSQL(tempInsertStatement.toString());
         }
     }
 
