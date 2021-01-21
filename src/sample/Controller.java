@@ -31,7 +31,7 @@ public class Controller implements Initializable {
     private String currentSelectedPlaylist = "";
     private int queuePosition = 0;
 
-    ObservableList<String> items = FXCollections.observableArrayList (sample.Main.songsList);
+    ObservableList<String> items = FXCollections.observableArrayList(sample.Main.songsList);
 
     @FXML
     ListView<String> songsList = new ListView<>(items);
@@ -147,6 +147,7 @@ public class Controller implements Initializable {
     /**
      * Handles all "On Mouse Clicked" events
      * Will stop playing the current song
+     *
      * @param e Event data
      */
     @FXML
@@ -232,6 +233,7 @@ public class Controller implements Initializable {
      * Will load the given songPath (parameter), initialize a new
      * MediaPlayer, and start the new song. We also check the status
      * of the previous player to avoid issues.
+     *
      * @param songPath String, the name of the song file. The rest of the file path will be added by the method.
      */
     public void playSong(String songPath) {
@@ -276,6 +278,7 @@ public class Controller implements Initializable {
      * if a playlist with the same name already exists.
      * This playlist will also automatically be added to
      * the database.
+     *
      * @param e Event data
      */
     public void createPlaylistBtnClicked(Event e) {
@@ -308,6 +311,7 @@ public class Controller implements Initializable {
 
     /**
      * Adds the currently playing song to the selected playlist.
+     *
      * @param e Event data
      */
     public void addSongToPlaylistClicked(Event e) {
@@ -324,17 +328,31 @@ public class Controller implements Initializable {
             return;
         }
 
-        // Should work, haven't tried since songs aren't added to the database yet!
-        // TODO: Make this work with special characters, such as '
-        currentlyPlaying = currentlyPlaying.replace("\'", "\\\'");
-        DB.insertSQL("INSERT INTO tblSongsPlaylist (fldSongId, fldPlaylistId) VALUES ((SELECT fldSongId FROM tblSongs WHERE fldFilePath = '" + currentlyPlaying + "'), (SELECT fldPlaylistId FROM tblPlaylists WHERE fldPlaylistName = '" + selItem + "'))");
-        System.out.println("INSERT INTO tblSongsPlaylist (fldSongId, fldPlaylistId) VALUES ((SELECT fldSongId FROM tblSongs WHERE fldFilePath = '" + currentlyPlaying + "'), (SELECT fldPlaylistId FROM tblPlaylists WHERE fldPlaylistName = '" + selItem + "'))");
+        //Checks if the song is already in the playlist
+        int songID = 0;
+        DB.selectSQL("SELECT COUNT(fldSongID) FROM tblSongsPlaylist WHERE fldSongId = (SELECT fldSongId FROM tblSongs WHERE fldFilePath = '" + currentlyPlaying + "') " +
+                "AND fldPlaylistId = (SELECT fldPlaylistId FROM tblPlaylists WHERE fldPlaylistName= '" + selItem + "')");
+        songID = Integer.parseInt(DB.getData());
+        clearData();
 
+        if(songID == 0) {
+
+            // Should work, haven't tried since songs aren't added to the database yet!
+            // TODO: Make this work with special characters, such as '
+            currentlyPlaying = currentlyPlaying.replace("\'", "\\\'");
+            DB.insertSQL("INSERT INTO tblSongsPlaylist (fldSongId, fldPlaylistId) VALUES ((SELECT fldSongId FROM tblSongs WHERE fldFilePath = '" + currentlyPlaying + "'), (SELECT fldPlaylistId FROM tblPlaylists WHERE fldPlaylistName = '" + selItem + "'))");
+            System.out.println("INSERT INTO tblSongsPlaylist (fldSongId, fldPlaylistId) VALUES ((SELECT fldSongId FROM tblSongs WHERE fldFilePath = '" + currentlyPlaying + "'), (SELECT fldPlaylistId FROM tblPlaylists WHERE fldPlaylistName = '" + selItem + "'))");
+
+        }
+        else{
+            System.out.println("That song is already in the playlist");
+        }
     }
 
     /**
      * Plays the previous song from the queue. If we are already
      * at the first song, then nothing will happen.
+     *
      * @param e Event data
      */
     public void prevBtnClicked(Event e) {
@@ -359,11 +377,12 @@ public class Controller implements Initializable {
     /**
      * Plays the next song in the queue. If we are already
      * at the last song, then nothing will happen.
+     *
      * @param e Event data
      */
     public void nextBtnClicked(Event e) {
         // Make sure we aren't already at the last song in the queue
-        if (queuePosition == queueList.getItems().size()-1) {
+        if (queuePosition == queueList.getItems().size() - 1) {
             return;
         }
 
@@ -406,7 +425,6 @@ public class Controller implements Initializable {
     }
 
 
-
     // Currently not in use, will add a song to a given playlist
     // All created playlists can be found at ArrayList<Playlist> sample.Main.listOfPlaylists
     // Make sure to update the database so we always are in sync!
@@ -417,22 +435,24 @@ public class Controller implements Initializable {
 
     /**
      * Adds a song (String) to the bottom of the queue list.
+     *
      * @param songName String, the exact name of the song.
      */
     public void addSongToQueue(String songName) {
         queueList.getItems().add(songName);
-        selectSongInQueue(queueList.getItems().size()-1);
-        queuePosition = queueList.getItems().size()-1;
+        selectSongInQueue(queueList.getItems().size() - 1);
+        queuePosition = queueList.getItems().size() - 1;
     }
 
     /**
      * Selects a song in the queue list at a given index.
      * By select, we mean as if a user clicked on it.
+     *
      * @param index int - index of item to select
      */
     public void selectSongInQueue(int index) {
         // Do nothing if the given index is higher than the count of songs in the queue
-        if (queueList.getItems().size()-1 < index) {
+        if (queueList.getItems().size() - 1 < index) {
             return;
         }
 
@@ -443,9 +463,24 @@ public class Controller implements Initializable {
     }
 
     /**
+     * Tommy's do while loop put in a method so we can use it through out the code and easily clear
+     * the DB.Select statements
+     */
+    public static void clearData() {
+        do {
+            String data = DB.getDisplayData();
+            if (data.equals(DB.NOMOREDATA)) {
+                break;
+            } else {
+                System.out.print(data);
+            }
+        } while (true);
+    }
+
+    /**
      * Adds all songs to the song list in the UI on program run
      *
-     * @param location unused URL parameter
+     * @param location  unused URL parameter
      * @param resources unused ResourceBundle parameter
      */
     public void initialize(URL location, ResourceBundle resources) {

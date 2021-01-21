@@ -20,7 +20,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         Parent root = FXMLLoader.load(getClass().getResource("player.fxml"));
         primaryStage.setTitle("Ultimate Music Player");
-        primaryStage.setScene(new Scene(root, 750, 450));
+        primaryStage.setScene(new Scene(root, 1080, 800));
         primaryStage.show();
     }
 
