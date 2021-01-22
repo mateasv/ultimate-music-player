@@ -232,6 +232,10 @@ public class Controller implements Initializable {
             return;
         }
         queueList.getItems().addAll(tmpSongList);
+        if (currentSelectedSong == null) {
+            currentSelectedSong = queueList.getItems().get(0);
+            queueList.getSelectionModel().select(0);
+        }
     }
 
     /**
