@@ -330,23 +330,45 @@ public class Controller implements Initializable {
 
         //Checks if the song is already in the playlist
         int songID = 0;
-        DB.selectSQL("SELECT COUNT(fldSongID) FROM tblSongsPlaylist WHERE fldSongId = (SELECT fldSongId FROM tblSongs WHERE fldFilePath = '" + currentlyPlaying + "') " +
-                "AND fldPlaylistId = (SELECT fldPlaylistId FROM tblPlaylists WHERE fldPlaylistName= '" + selItem + "')");
+        DB.selectSQL("SELECT COUNT(fldSongID) FROM tblSongsPlaylist WHERE fldSongId = (SELECT fldSongId FROM tblSongs WHERE fldFilePath = '" + currentlyPlaying + "') AND fldPlaylistId = (SELECT fldPlaylistId FROM tblPlaylists WHERE fldPlaylistName= '" + selItem + "')");
         songID = Integer.parseInt(DB.getData());
         clearData();
 
+        // 0 = not in playlist. 1+ = the song is in the playlist
         if(songID == 0) {
 
             // Should work, haven't tried since songs aren't added to the database yet!
             // TODO: Make this work with special characters, such as '
             currentlyPlaying = currentlyPlaying.replace("\'", "\\\'");
             DB.insertSQL("INSERT INTO tblSongsPlaylist (fldSongId, fldPlaylistId) VALUES ((SELECT fldSongId FROM tblSongs WHERE fldFilePath = '" + currentlyPlaying + "'), (SELECT fldPlaylistId FROM tblPlaylists WHERE fldPlaylistName = '" + selItem + "'))");
-            System.out.println("INSERT INTO tblSongsPlaylist (fldSongId, fldPlaylistId) VALUES ((SELECT fldSongId FROM tblSongs WHERE fldFilePath = '" + currentlyPlaying + "'), (SELECT fldPlaylistId FROM tblPlaylists WHERE fldPlaylistName = '" + selItem + "'))");
+            //System.out.println("INSERT INTO tblSongsPlaylist (fldSongId, fldPlaylistId) VALUES ((SELECT fldSongId FROM tblSongs WHERE fldFilePath = '" + currentlyPlaying + "'), (SELECT fldPlaylistId FROM tblPlaylists WHERE fldPlaylistName = '" + selItem + "'))");
 
-        }
-        else{
+        } else {
             System.out.println("That song is already in the playlist");
         }
+    }
+
+    /**
+     * Removes the currently playling song from the selected playlist.
+     * @param e Event data
+     */
+    public void removeSongFromPlaylistClicked(Event e) {
+        String selItem = playlistList.getSelectionModel().getSelectedItem();
+
+        // Check if any playlist is selected.
+        if (selItem == null) {
+            System.out.println("No playlist selected");
+            return;
+        }
+
+        // This is true if the user haven't played a song yet.
+        if (currentlyPlaying.length() == 0) {
+            return;
+        }
+
+        // Delete all rows from tblSongsPlaylist, where the fldSongId is the song
+        // currently playing, and fldPlaylistId is the currently selected playlist.
+        DB.deleteSQL("DELETE FROM tblSongsPlaylist WHERE fldSongId = (SELECT fldSongId FROM tblSongs WHERE fldFilePath = '" + currentlyPlaying + "') AND fldPlaylistId = (SELECT fldPlaylistId FROM tblPlaylists WHERE fldPlaylistName= '" + selItem + "')");
     }
 
     /**
