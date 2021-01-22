@@ -15,8 +15,6 @@ import javafx.scene.media.MediaPlayer;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 import static sample.Main.getPlaylistsFromDatabase;
@@ -203,8 +201,15 @@ public class Controller implements Initializable {
         playSong(currentSelectedSong);
     }
 
+    /**
+     * Clicked event on the playlistList ListView.
+     * When a playlist is clicked twice, the songs
+     * from the playlist will be added to the queue.
+     * @param e Event data
+     */
     @FXML
     public void playlistListClicked(Event e) {
+        // Get the current selected item from the playlist ListView
         String tmpCrnt = playlistList.getSelectionModel().getSelectedItem();
 
         // Clicking the playlistList without clicking on an item is just ignored
@@ -282,9 +287,11 @@ public class Controller implements Initializable {
      * @param e Event data
      */
     public void createPlaylistBtnClicked(Event e) {
+        // The playlist name given by the user.
         String writtenPlaylistName = textFieldPlaylistName.getText();
 
         // Check if the user wrote anything
+        // Do nothing if no playlist name is provided
         if (writtenPlaylistName.length() == 0) {
             return;
         }
@@ -353,6 +360,7 @@ public class Controller implements Initializable {
      * @param e Event data
      */
     public void removeSongFromPlaylistClicked(Event e) {
+        // Get the current selected playlist
         String selItem = playlistList.getSelectionModel().getSelectedItem();
 
         // Check if any playlist is selected.
@@ -444,15 +452,6 @@ public class Controller implements Initializable {
 
         // Delete the playlist from the database.
         DB.deleteSQL("DELETE FROM tblPlaylists WHERE fldPlaylistName = '" + selItem + "'");
-    }
-
-
-    // Currently not in use, will add a song to a given playlist
-    // All created playlists can be found at ArrayList<Playlist> sample.Main.listOfPlaylists
-    // Make sure to update the database so we always are in sync!
-    public void addSongToPlaylist(String playlistName) {
-        // Add a song to the first playlist
-        //sample.Main.listOfPlaylists.get(0).addToPlaylist(new Song("baby", "kris", "songs"));
     }
 
     /**

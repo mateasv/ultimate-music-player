@@ -200,11 +200,14 @@ public class Main extends Application {
             // Add every song (that will be added) to the query.
             for (int i = 0; i < songsNotAddedToDatabase.size(); i++) {
                 tempInsertStatement.append("('");
-                tempInsertStatement.append(songsNotAddedToDatabase.get(i)); // Song title
+                tempInsertStatement.append(songsNotAddedToDatabase.get(i)); // Song title (Same as the file path since it is redundant). Getting this from mp3 ID3 metadata could make this data unique.
                 tempInsertStatement.append("', '");
                 tempInsertStatement.append(songsNotAddedToDatabase.get(i)); // Song path (relative to the songs folder)
                 tempInsertStatement.append("', '");
-                tempInsertStatement.append("N/A')"); // N/A artist, we don't have that from file metadata yet
+                tempInsertStatement.append("N/A')"); // N/A artist, we don't have that from file metadata
+
+                // Reading ID3 data from a media file requires reading file signatures
+                // We are not a aware of any native Java libraries to do this with.
 
                 // Avoid trailing commas
                 if (i < songsNotAddedToDatabase.size() - 1) {
@@ -227,6 +230,7 @@ public class Main extends Application {
     public static ArrayList<String> getPlaylistsFromDatabase() {
         ArrayList<String> tempPlaylists = new ArrayList<>();
 
+        // Query to get the name of all playlists in the database
         DB.selectSQL("SELECT fldPlaylistName FROM tblPlaylists");
 
         int count = 0;
@@ -241,6 +245,7 @@ public class Main extends Application {
                 break;
             } else {
                 count++;
+                // Add the song to the arrayList (That will be returned by this method)
                 tempPlaylists.add(data.replaceFirst("\\s++$", ""));
             }
         } while(true);
@@ -248,9 +253,17 @@ public class Main extends Application {
         return tempPlaylists;
     }
 
+    /**
+     * This method will return an ArrayList of songs from a given playlist.
+     *
+     * @param playlistName The playlist to get the songs from
+     * @return ArrayList (String) of songs in the playlist. Null if none.
+     */
     public static ArrayList<String> getSongsFromPlaylist(String playlistName) {
+        // Temporary ArrayList that will store all the songs in the given playlist
         ArrayList<String> tempPlaylists = new ArrayList<>();
 
+        // Query to select the file path of all songs in the given playlist
         DB.selectSQL("SELECT fldFilePath FROM tblSongs WHERE fldSongId IN (SELECT fldSongId FROM tblSongsPlaylist WHERE fldPlaylistId = (SELECT fldPlaylistId FROM tblPlaylists WHERE fldPlaylistName = '" + playlistName + "'));");
 
         int count = 0;
@@ -266,10 +279,12 @@ public class Main extends Application {
                 break;
             } else {
                 count++;
+                // Add the song to the temporary ArrayList (which will be returned later)
                 tempPlaylists.add(data.replaceFirst("\\s++$", ""));
             }
         } while(true);
 
+        // Return the ArrayList of songs in the given playlist
         return tempPlaylists;
     }
 
@@ -322,14 +337,19 @@ public class Main extends Application {
      * @return boolean, true if the folder exists
      */
     public static boolean folderExists(String folderName) {
+        // Get a String Array of items in the current directory ("user.dir")
         String[] contents = currentDir.list();
         assert contents != null;
+
+        // Iterate over every item
         for(String content: contents){
+            // Check if the folder exists (primarily used for the songs folder)
             if(content.equals(folderName)){
-                // The folder exists!
+                // Return true, the folder exists!
                 return true;
             }
         }
+        // Return false, the folder does not exist.
         return false;
     }
 
@@ -345,6 +365,6 @@ public class Main extends Application {
         currentDir = new File(currentDir + path);
         created = currentDir.mkdir();
 
-        return created; // True = created successfully
+        return created; // True = folder created successfully
     }
 }
